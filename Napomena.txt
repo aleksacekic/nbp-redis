@@ -1,0 +1,12 @@
+U prilogu je web aplikacija koja služi za objavljivanje anketa.
+Front-end deo aplikacije je realizovan u React-u, Back-end u Next.js.
+Koristi se Redis cloud baza.
+Aplikacija se pokreće kucanjem "npm run dev" unutar konzole.
+Pokreće se na adresi localhost:3000
+-------------------------------------------------
+Jedan od parametra pri kreiranju ankete je unošenje broja sati koliko će trajati anketa,
+međutim zbog potrebe provere određenih funckionalnosti nakon isteka ankete ugrađeno je da svaki "sat" zapravo traje po 10 sekundi.
+
+Anketa sadrži poll-chart na kome se nalaze podaci o tome koliko ljudi je glasalo za tu anketu, međutim nakon kreiranja ankete,
+ona odmah prikazuje vrednosti kao da je veliki broj ljudi glasao. To je implementirano čisto zbog toga da se prikaže kako bi poll-chart 
+izgledao kada bi veliki broj ljudi glasao i bitna napomena je da to ne ugrožava tehničke detalje aplikacije.
