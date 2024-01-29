@@ -4,9 +4,9 @@ Web aplikacija koja omogućava korisnicima da kreiraju i brišu ankete, kao i da
 
 ## Podešavanja
 
+```bash
 npm install
 
-```bash
 npm run dev
 # or
 yarn dev
