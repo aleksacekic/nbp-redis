@@ -2,7 +2,7 @@
 
 Web aplikacija koja omogućava korisnicima da kreiraju i brišu ankete, kao i da učevstvuju u anketama u real-timeu. Korisnici se obaveštavaju o završetku ankete (korišćenje Redis Pub/Sub mehanizma).
 
-## Podešavanja
+## Pokretanje
 
 ```bash
 npm install
