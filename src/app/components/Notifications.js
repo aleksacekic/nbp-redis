@@ -9,8 +9,8 @@ const Notifications = ({ nots, noviObj }) => {
         noviObj.map((item) => (
           <div key={item.id} className="not">
             <div>
-              Anketa u kojoj ste učestvovali, '{item.question}', završena je{" "}
-              {item.expTime}. Rezultati:
+              Anketa u kojoj ste učestvovali, &bdquo;{item.question}&ldquo;,
+              završena je {item.expTime}. Rezultati:
             </div>
             <ul>
               {item.options.map((option, index) => (

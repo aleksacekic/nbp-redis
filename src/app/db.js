@@ -1,31 +1,27 @@
 import { createClient } from "redis";
 
-const client = createClient({
-  password: "fwVzGyxBw8udykChwPq2HvCsPQ5Xshdf",
-  socket: {
-    host: "redis-13957.c323.us-east-1-2.ec2.cloud.redislabs.com",
-    port: 13957,
-  },
-});
+const REDIS_URL = process.env.REDIS_URL;
 
-client.on("error", (err) => console.log(err));
-
-if (!client.isOpen) {
-  client.connect();
+if (!REDIS_URL) {
+  throw new Error("Nedostaje REDIS_URL environment varijabla");
 }
 
-const client_lis = createClient({
-  password: "fwVzGyxBw8udykChwPq2HvCsPQ5Xshdf",
-  socket: {
-    host: "redis-13957.c323.us-east-1-2.ec2.cloud.redislabs.com",
-    port: 13957,
-  },
-});
+/**
+ * Jedan deljeni Redis klijent za komande (CRUD nad anketama).
+ * U dev modu ga cuvamo na globalu da hot-reload ne otvara nove konekcije.
+ * Pub/Sub listener (keyspace notifikacije) je izmesten u zaseban
+ * `socket-server/` koji se deploy-uje odvojeno (Render), jer Vercel
+ * serverless ne moze da drzi stalnu konekciju.
+ */
+let client = global._redisClient;
 
-client_lis.on("error", (err) => console.log(err));
-
-if (!client_lis.isOpen) {
-  client_lis.connect();
+if (!client) {
+  client = createClient({ url: REDIS_URL });
+  client.on("error", (err) => console.error("Redis error:", err));
+  client.connect().catch((err) => console.error("Redis connect error:", err));
+  if (process.env.NODE_ENV !== "production") {
+    global._redisClient = client;
+  }
 }
 
-export { client, client_lis };
+export { client };

@@ -11,8 +11,10 @@ import {
   dodajAnketu,
   vratiSveAnkete,
   izbrisiAnketu,
-  osluskuj,
 } from "./server.js";
+
+const SOCKET_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
 
 function App() {
   
@@ -83,7 +85,6 @@ function App() {
     //"pok" Da bi se izvrsilo samo jednom
     if (pok == 0) {
       kolacici();
-      osluskuj();
     }
     pok++;
   }, []);
@@ -102,7 +103,7 @@ function App() {
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:3001/");
+    const socket = io(SOCKET_URL);
     socket.on("serverEvent", (data) => {
       handle(data)
       socket.disconnect()
