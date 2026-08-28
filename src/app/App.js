@@ -143,25 +143,32 @@ function App() {
 
   
   return (
-    <div className="App">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <MakePoll onAdd={addPoll} />
-      <div className="main">
-        {polls.length > 0 ? (
-          <Polls polls={polls} onDelete={deletePoll} kor={korisnik} rend_func={renderPolls}/>
-        ) : (
-          <div className="notification">Nema dostupnih anketa</div>
-        )}
-        {notifications.length > 0 ? (
+
+      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-6">
+          <MakePoll onAdd={addPoll} />
+
+          {polls.length > 0 ? (
+            <Polls
+              polls={polls}
+              onDelete={deletePoll}
+              kor={korisnik}
+              rend_func={renderPolls}
+            />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+              Trenutno nema dostupnih anketa. Napravi prvu!
+            </div>
+          )}
+        </div>
+
+        <aside className="lg:sticky lg:top-6 lg:self-start">
           <Notifications noviObj={notifications} />
-        ) : (
-          <div className="notification">
-            <h2>Notifikacije</h2>
-            <div className="linija"></div>
-            <div className="not">Trenutno nema notifikacija.</div>
-          </div>
-        )}
-      </div>
+        </aside>
+      </main>
+
       <Footer />
     </div>
   );

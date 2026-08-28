@@ -3,9 +3,15 @@ import Poll from "./Poll";
 
 const Polls = ({ polls, onDelete, kor, rend_func }) => {
   return (
-    <div className="polls">
+    <div className="space-y-6">
       {polls.map((poll) => (
-        <Poll key={poll.id} poll={poll} onDelete={onDelete} kor = {kor} rend_func={rend_func} />
+        <Poll
+          key={poll.id}
+          poll={poll}
+          onDelete={onDelete}
+          kor={kor}
+          rend_func={rend_func}
+        />
       ))}
     </div>
   );
