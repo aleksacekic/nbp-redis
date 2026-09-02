@@ -1,81 +1,81 @@
 # Real-time Polling
 
-Web aplikacija za kreiranje i deljenje anketa u realnom vremenu. Korisnici kreiraju
-ankete, glasaju uživo i dobijaju obaveštenje kada anketa istekne — završetak ankete
-se detektuje preko **Redis keyspace notifikacija (Pub/Sub)**, a rezultat se svim
-povezanim klijentima šalje kroz **Socket.IO**.
+A web application for creating and sharing polls in real time. Users create
+polls, vote live, and get a notification when a poll expires — poll expiration
+is detected through **Redis keyspace notifications (Pub/Sub)**, and the result
+is pushed to all connected clients over **Socket.IO**.
 
 **Live demo:** https://nbp-redis.vercel.app
 
 ---
 
-## Funkcionalnosti
+## Features
 
-- Kreiranje ankete sa proizvoljnim brojem opcija i vremenom trajanja
-- Glasanje uživo — rezultati se ažuriraju bez osvežavanja stranice
-- Prikaz rezultata kroz pie chart (Chart.js)
-- Automatsko obaveštenje učesnicima kada anketa istekne (Redis Pub/Sub → Socket.IO)
-- Brisanje sopstvenih anketa
-- Identifikacija korisnika preko cookie-ja (bez registracije)
+- Creating a poll with an arbitrary number of options and a duration
+- Live voting — results update without refreshing the page
+- Results shown as a pie chart (Chart.js)
+- Automatic notification to participants when a poll expires (Redis Pub/Sub → Socket.IO)
+- Deleting your own polls
+- User identification via a cookie (no registration)
 
-## Tehnologije
+## Technologies
 
-| Sloj      | Tehnologija                                               |
-| --------- | --------------------------------------------------------- |
-| Frontend  | React 18, Next.js 14 (App Router), Tailwind CSS           |
-| Backend   | Next.js Server Actions                                    |
-| Real-time | Socket.IO (zaseban Node.js server)                        |
-| Baza      | Redis Cloud (Hash strukture + `EXPIRE` + keyspace events) |
-| Deploy    | Vercel (Next app) + Render (socket server)                |
+| Layer     | Technology                                              |
+| --------- | ------------------------------------------------------- |
+| Frontend  | React 18, Next.js 14 (App Router), Tailwind CSS         |
+| Backend   | Next.js Server Actions                                  |
+| Real-time | Socket.IO (separate Node.js server)                     |
+| Database  | Redis Cloud (Hash structures + `EXPIRE` + keyspace events) |
+| Deploy    | Vercel (Next app) + Render (socket server)              |
 
-## Arhitektura
+## Architecture
 
-Aplikacija ima dva procesa:
+The application has two processes:
 
-- **Next.js app** (`src/`) — UI i Server Actions koje čitaju/pišu u Redis.
-- **Socket server** (`socket-server/`) — stalno otvorena WebSocket veza + Redis
-  `subscribe` na `__keyevent@0__:expired`. Kada anketa istekne, server emituje
-  `serverEvent` svim klijentima.
+- **Next.js app** (`src/`) — UI and Server Actions that read from / write to Redis.
+- **Socket server** (`socket-server/`) — a permanently open WebSocket connection +
+  Redis `subscribe` on `__keyevent@0__:expired`. When a poll expires, the server
+  emits `serverEvent` to all clients.
 
-Zaseban proces je potreban jer je Vercel serverless i ne može da drži trajnu
-WebSocket vezu ni Redis `subscribe`.
+A separate process is required because Vercel is serverless and cannot hold a
+persistent WebSocket connection or a Redis `subscribe`.
 
 ## Screenshots
 
-### Početna strana
+### Home page
 
-![Početna strana](docs/screenshots/RedisApp.png)
+![Home page](docs/screenshots/RedisApp.png)
 
-### Kreiranje ankete
+### Creating a poll
 
-![Kreiranje ankete](docs/screenshots/RedisAppPravljenje.png)
+![Creating a poll](docs/screenshots/RedisAppPravljenje.png)
 
-## Pokretanje lokalno
+## Running locally
 
 ```bash
-# 1. Instaliraj zavisnosti (root + socket server)
+# 1. Install dependencies (root + socket server)
 npm install
 cd socket-server && npm install && cd ..
 
-# 2. Napravi .env.local (vidi .env.example) i popuni REDIS_URL
+# 2. Create .env.local (see .env.example) and fill in REDIS_URL
 
-# 3. Pokreni oba procesa odjednom
+# 3. Run both processes at once
 npm run dev:all
 ```
 
-Aplikacija: [http://localhost:3000](http://localhost:3000) · Socket server: `http://localhost:3001`
+App: [http://localhost:3000](http://localhost:3000) · Socket server: `http://localhost:3001`
 
-Alternativno, u dva terminala: `npm run dev` i `npm run dev:socket`.
+Alternatively, in two terminals: `npm run dev` and `npm run dev:socket`.
 
-### Environment varijable
+### Environment variables
 
-| Varijabla                | Opis                                                    |
-| ------------------------ | ------------------------------------------------------- |
-| `REDIS_URL`              | Connection string ka Redis bazi (Redis Cloud → Connect) |
-| `NEXT_PUBLIC_SOCKET_URL` | URL Socket.IO servera (lokalno `http://localhost:3001`) |
+| Variable                 | Description                                            |
+| ------------------------ | ----------------------------------------------------- |
+| `REDIS_URL`              | Connection string to the Redis database (Redis Cloud → Connect) |
+| `NEXT_PUBLIC_SOCKET_URL` | URL of the Socket.IO server (locally `http://localhost:3001`) |
 
-## Napomene
+## Notes
 
-- Radi lakšeg testiranja, svaki "sat" trajanja ankete zapravo traje **10 sekundi**.
-- Nakon kreiranja, anketa prikazuje nasumične glasove — čisto radi demonstracije
-  izgleda pie chart-a. Ne utiče na tehničku logiku aplikacije.
+- For easier testing, every "hour" of a poll's duration actually lasts **10 seconds**.
+- After creation, a poll shows random votes — purely to demonstrate how the pie
+  chart looks. It does not affect the application's technical logic.
