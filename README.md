@@ -48,15 +48,7 @@ WebSocket vezu ni Redis `subscribe`.
 
 ### Kreiranje ankete
 
-![Kreiranje ankete](docs/screenshots/create-poll.png)
-
-### Glasanje i rezultati
-
-![Glasanje](docs/screenshots/vote.png)
-
-### Obaveštenje o završetku ankete
-
-![Notifikacija](docs/screenshots/notification.png)
+![Kreiranje ankete](docs/screenshots/RedisAppPravljenje.png)
 
 ## Pokretanje lokalno
 
