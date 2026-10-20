@@ -2,7 +2,7 @@ import React from "react";
 import PollText from "./PollText";
 import PollChart from "./PollChart";
 import { FaTimes } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Poll = ({ poll, index, onDelete, kor, rend_func }) => {
   const [data, setData] = useState({
@@ -10,15 +10,22 @@ const Poll = ({ poll, index, onDelete, kor, rend_func }) => {
     datasets: [{ data: poll.votePerOption }],
   });
 
-  const promeniData = (rez) => {
+  // Kad App primi novi glas preko socket-a, poll.votePerOption se promeni -> osvezi grafikon
+  useEffect(() => {
+    setData({ labels: poll.options, datasets: [{ data: [...poll.votePerOption] }] });
+  }, [poll.votePerOption]);
+
+  // rez = izabrani odgovor, novaVrednost = ukupan broj glasova koji je vratio server
+  const promeniData = (rez, novaVrednost) => {
     if (rez === null || rez === undefined || rez === "") return;
 
     let x;
     for (let i = 0; i < data.labels.length; i++)
       if (rez === data.labels[i]) x = i;
 
-    let niz = data.datasets[0].data;
-    niz[x]++;
+    if (x === undefined) return;
+    let niz = [...data.datasets[0].data]; // kopija - stanje se ne menja direktno
+    niz[x] = typeof novaVrednost === "number" ? Math.max(niz[x], novaVrednost) : niz[x] + 1;
     let newdata = { labels: data.labels, datasets: [{ data: niz }] };
 
     setData(newdata);

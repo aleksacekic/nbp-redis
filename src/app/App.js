@@ -103,22 +103,46 @@ function App() {
   };
 
   useEffect(() => {
-    const socket = io(SOCKET_URL);
-    socket.on("serverEvent", (data) => {
+    const socket = io(SOCKET_URL); //otvara vezu ka socker-serveru
+    socket.on("serverEvent", (data) => { //slusa obaveštenja od socket-servera, kada anketa istekne, socket-server emituje event "serverEvent"
       handle(data)
       socket.disconnect()
     });
 
-  return () => socket.disconnect()
+  return () => socket.disconnect() //cleanup funkcija koja se poziva kada se komponenta unmountuje, da bi se zatvorila veza sa socket-serverom
   }, [polls])
+
+  // Live glasovi: socket-server prosledjuje svaki novi glas (Redis Pub/Sub kanal "glasovi").
+  // Prazan niz zavisnosti = jedna veza za ceo zivot stranice. Funkcionalni setPolls
+  // uvek dobija sveze stanje, pa ovde nema stale closure problema.
+  useEffect(() => {
+    const socket = io(SOCKET_URL);
+    socket.on("noviGlas", ({ anketaId, odgovor, glasovi }) => {
+      setPolls((prevPolls) =>
+        prevPolls.map((poll) => {
+          if (String(poll.id) !== String(anketaId)) return poll;
+          const index = poll.options.indexOf(odgovor);
+          if (index === -1) return poll;
+          const votePerOption = [...poll.votePerOption]; // nov niz, ne menjamo staro stanje
+          // glasovi samo rastu, pa Math.max stiti od poruka koje stignu van redosleda
+          votePerOption[index] = Math.max(votePerOption[index], glasovi);
+          const numbOfVotes = votePerOption.reduce((a, b) => a + b, 0);
+          return { ...poll, votePerOption, numbOfVotes };
+        })
+      );
+    });
+    return () => socket.disconnect();
+  }, []);
 
   const handle = async (data) => {
     
     console.log(data.answer)
-    let str = data.answer.substring(6)
-    let pocetak = data.answer.substring(0, 6)
+    // kljuc izgleda kao "anketa:5" (sama anketa) ili "anketa:5:glasovi" (glasaci)
+    let delovi = data.answer.split(":")
+    let pocetak = delovi[0]
+    let str = delovi[1]
     console.log(str, pocetak)
-    if(pocetak === 'anketa')
+    if(pocetak === 'anketa' && delovi.length === 2)
     {
       let noviObj = getPoll(str);
       if (noviObj && noviObj.length > 0) {

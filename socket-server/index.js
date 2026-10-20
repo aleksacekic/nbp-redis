@@ -75,10 +75,22 @@ async function startRedisListener() {
   await subscriber.subscribe("__keyevent@0__:expired", (key) => {
     if (!key) return;
     console.log("expired:", key);
-    io.emit("serverEvent", { answer: key });
+    io.emit("serverEvent", { answer: key }); //salje svim klijentima da je anketa istekla.
   });
 
-  console.log("Slusam Redis expired evente...");
+  // Novi glasovi: server.js posle HINCRBY radi PUBLISH na kanal "glasovi".
+  // Ista subscriber konekcija moze da slusa vise kanala.
+  await subscriber.subscribe("glasovi", (poruka) => {
+    try {
+      const glas = JSON.parse(poruka);
+      console.log("novi glas:", glas);
+      io.emit("noviGlas", glas); // salje svim klijentima novi broj glasova
+    } catch (err) {
+      console.error("Neispravna poruka na kanalu glasovi:", err.message);
+    }
+  });
+
+  console.log("Slusam Redis expired evente i nove glasove...");
 }
 
 httpServer.listen(PORT, () => {

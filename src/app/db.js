@@ -17,7 +17,7 @@ let client = global._redisClient;
 
 if (!client) {
   client = createClient({ url: REDIS_URL });
-  client.on("error", (err) => console.error("Redis error:", err));
+  client.on("error", (err) => console.error("Redis error:", err)); // da greska u konekciji ne bi srusila ceo Node proces
   client.connect().catch((err) => console.error("Redis connect error:", err));
   if (process.env.NODE_ENV !== "production") {
     global._redisClient = client;

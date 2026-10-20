@@ -27,7 +27,7 @@ const PollText = ({ poll, kor, func, data, rend_func }) => {
       alert("Anketa je u međuvremenu završena.");
       location.reload();
     } else {
-      func(selectedOption);
+      func(selectedOption, odg); // odg = novi ukupan broj glasova sa servera
     }
   };
 
