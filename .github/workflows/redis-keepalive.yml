@@ -1,0 +1,31 @@
+name: Redis keepalive
+
+# Redis Cloud briše free baze zbog neaktivnosti, pa jednom nedeljno upisujemo ključ.
+on:
+  schedule:
+    - cron: "0 9 * * 1" # ponedeljkom u 09:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Write keepalive key to Redis
+        env:
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+        run: |
+          npm install --no-save redis@4
+          node -e '
+          const { createClient } = require("redis");
+          const c = createClient({ url: process.env.REDIS_URL });
+          c.on("error", (e) => { console.error(e.message); process.exit(1); });
+          c.connect().then(async () => {
+            await c.set("keepalive", new Date().toISOString());
+            console.log("keepalive written");
+            await c.quit();
+          });
+          '
